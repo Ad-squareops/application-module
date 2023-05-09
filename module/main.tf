@@ -1,26 +1,3 @@
-locals {
-  user_data = <<-EOT
-    #AmazonCodeDeploy Agent
-    #!/bin/bash
-    sudo apt update -y
-    sudo apt install ruby wget -y
-    wget https://aws-codedeploy-ca-central-1.s3.ca-central-1.amazonaws.com/latest/install
-    sudo chmod +x ./install
-    sudo ./install auto
-    sudo systemctl start codedeploy-agent.service
-    sudo systemctl enable codedeploy-agent.service
-
-    #AmazonCloudWatch Agent
-    sudo apt update -y
-    sudo mkdir /tmp/cwa
-    cd /tmp/cwa
-    sudo wget https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip -O AmazonCloudWatchAgent.zip
-    sudo apt install -y unzip
-    sudo unzip -o AmazonCloudWatchAgent.zip
-    sudo ./install.sh
-  EOT
-}
-
 module "key_pair" {
   source      = "squareops/keypair/aws"
   environment = var.Environment
@@ -113,7 +90,7 @@ module "asg" {
   enable_monitoring            = true
   security_groups              = [aws_security_group.asg-sg.id]
   iam_instance_profile_name    = aws_iam_instance_profile.instance-profile.name
-  user_data                    = base64encode(local.user_data)
+  #user_data                    = base64encode(local.user_data)
 
   tags = {
     Environment = var.Environment
