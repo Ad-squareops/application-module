@@ -21,7 +21,7 @@ module "asg" {
   desired_asg_capacity = 1
 
   # Launch template
-  asg_ami_id        = "ami-0db245b76e5c21ca1"
+  asg_ami_id        = "ami-0d92b9f41dc7658ce"
   asg_instance_type = "t3a.small"
 
 
@@ -41,7 +41,6 @@ module "asg" {
     stickiness_enabled             = true
     stickiness_type                = "lb_cookie"
     stickiness_cookie_duration_sec = 600
-    target_type                    = "instance"
   }
 
   service_health_check = {
