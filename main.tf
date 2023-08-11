@@ -271,7 +271,7 @@ resource "aws_autoscaling_policy" "customized_metric_specification" {
 
 
 
-#ALB Security Group  
+#ALB Security Group
 resource "aws_security_group" "alb-sg" {
   name        = format("%s-%s-alb-sg", var.Environment, var.app_name)
   description = "alb-sg"
