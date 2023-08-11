@@ -1,4 +1,4 @@
-## sqs
+## sqs Example
 
 ![squareops_avatar]
 
@@ -6,67 +6,7 @@
 
 ### [SquareOps Technologies](https://squareops.com/) Your DevOps Partner for Accelerating cloud journey.
 <br>
-
-This module deploys ASG. With this module, take the advantage of ASG installation in your AWS account. This module will deploy ASG, ALB, ACM, route 53 sub domain which will be used for your application and domain and acm mapping to ALB for https request.
-
-## Important Notes:
-This module is compatible with all the terraform versions which is great news for users deploying the module on AWS running account. Reviewed the module's documentation, meet specific configuration requirements, and test thoroughly after deployment to ensure everything works as expected.
-
-
-## Usage Example
-
-```hcl
-
-module "asg" {
-  source = "../../"
-
-  Environment          = local.Environment
-  app_name             = local.app_name
-  app_private_subnets  = ["subnet-0a922c6f66dc35a69"]
-  min_asg_capacity     = 1
-  max_asg_capacity     = 1
-  desired_asg_capacity = 1
-  enabled_metrics      = false
-
-  # Launch template
-  asg_ami_id        = "ami-08e5424edfe926b43"
-  asg_instance_type = "t3a.small"
-  use_default_image = false
-
-
-  #Load balancer
-  vpc_id             = local.vpc_id
-  alb_public_subnets = ["subnet-044e1ac384f464b00", "subnet-07f69540d40775872"]
-  route53_zone_id    = local.route53_zone_id
-  acm_domain_name    = local.acm_domain_name
-
-
-  application_port = {
-    backend_protocol = "HTTP"
-    backend_port     = 80
-  }
-
-  alb_configuration = {
-    stickiness_enabled             = true
-    stickiness_type                = "lb_cookie"
-    stickiness_cookie_duration_sec = 600
-    target_type                    = "instance"
-  }
-
-  service_health_check = {
-    path         = "/"
-    matcher      = 200
-    protocol     = "HTTP"
-    timeout_sec  = "5"
-    interval_sec = "30"
-  }
-}
-
-
-
-
-```
-
+This example will be very useful for users who are new to a module and want to quickly learn how to use it. By reviewing the examples, users can gain a better understanding of how the module works, what features it supports, and how to customize it to their specific needs.
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
@@ -77,6 +17,13 @@ No requirements.
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
+
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_sqs"></a> [sqs](#module\_asg_) | squareops/asg/aws | n/a |
+
 
 ## Inputs
 
@@ -126,42 +73,3 @@ No requirements.
 | <a name="dead_letter_queue_name"></a> [dead\_letter\_queue_name](#output\_dead\_letter\_queue_name) | The name of the DLQ-SQS queue |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-
-## Contribution & Issue Reporting
-
-To report an issue with a project:
-
-  1. Check the repository's [issue tracker](https://github.com/squareops/terraform-kubernetes-sqs/issues) on GitHub
-  2. Search to see if the issue has already been reported
-  3. If you can't find an answer to your question in the documentation or issue tracker, you can ask a question by creating a new issue. Be sure to provide enough context and details so others can understand your problem.
-
-## License
-
-Apache License, Version 2.0, January 2004 (http://www.apache.org/licensqs/).
-
-## Support Us
-
-To support a GitHub project by liking it, you can follow these steps:
-
-  1. Visit the repository: Navigate to the [GitHub repository](https://github.com/squareops/terraform-kubernetes-sqs).
-
-  2. Click the "Star" button: On the repository page, you'll see a "Star" button in the upper right corner. Clicking on it will star the repository, indicating your support for the project.
-
-  3. Optionally, you can also leave a comment on the repository or open an issue to give feedback or suggest changes.
-
-Starring a repository on GitHub is a simple way to show your support and appreciation for the project. It also helps to increase the visibility of the project and make it more discoverable to others.
-
-## Who we are
-
-We believe that the key to success in the digital age is the ability to deliver value quickly and reliably. That’s why we offer a comprehensive range of DevOps & Cloud services designed to help your organization optimize its systems & Processqs for speed and agility.
-
-  1. We are an AWS Advanced consulting partner which reflects our deep expertise in AWS Cloud and helping 100+ clients over the last 5 years.
-  2. Expertise in Kubernetes and overall container solution helps companies expedite their journey by 10X.
-  3. Infrastructure Automation is a key component to the success of our Clients and our Expertise helps deliver the same in the shortest time.
-  4. DevSecOps as a service to implement security within the overall DevOps process and helping companies deploy securely and at speed.
-  5. Platform engineering which supports scalable,Cost efficient infrastructure that supports rapid development, testing, and deployment.
-  6. 24*7 SRE service to help you Monitor the state of your infrastructure and eradicate any issue within the SLA.
-
-We provide [support](https://squareops.com/contact-us/) on all of our projects, no matter how small or large they may be.
-
-To find more information about our company, visit [squareops.com](https://squareops.com/), follow us on [Linkedin](https://www.linkedin.com/company/squareops-technologies-pvt-ltd/), or fill out a [job application](https://squareops.com/careers/). You can also checkout our [Case-studies](https://squareops.com/case-studies/) or [Blogs](https://squareops.com/blog/) to understand more about our solutions. If you have any questions or would like assistance with your cloud strategy and implementation, please don't hesitate to [contact us](https://squareops.com/contact-us/).

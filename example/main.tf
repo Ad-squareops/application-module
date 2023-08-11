@@ -14,7 +14,7 @@ locals {
 }
 
 module "asg" {
-  source = "../module/"
+  source = "../../"
 
   Environment          = local.Environment
   app_name             = local.app_name
@@ -57,4 +57,3 @@ module "asg" {
     interval_sec = "30"
   }
 }
-
