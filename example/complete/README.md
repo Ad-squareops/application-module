@@ -1,4 +1,4 @@
-## sqs Example
+## AutoScalingGroup Example
 
 ![squareops_avatar]
 

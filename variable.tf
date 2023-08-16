@@ -1,5 +1,5 @@
 #General
-variable "Environment" {
+variable "environment" {
   description = "Environment name of the project like production, staging or developement"
   type        = string
   default     = ""
@@ -11,17 +11,8 @@ variable "app_name" {
   default     = ""
 }
 
-variable "additional_tags" {
-  description = "additional tags which we will add if any user or company requires"
-  type        = map(string)
-  default = {
-    Owner     = ""
-    Terraform = "true"
-  }
-}
-
-variable "enabled_metrics" {
-  description = "metrics to be collected by ASG"
+variable "metrics_enabled" {
+  description = "A list of metrics to collect. The allowed values are `GroupDesiredCapacity`, `GroupInServiceCapacity`, `GroupPendingCapacity`, `GroupMinSize`, `GroupMaxSize`, `GroupInServiceInstances`, `GroupPendingInstances`, `GroupStandbyInstances`, `GroupStandbyCapacity`, `GroupTerminatingCapacity`, `GroupTerminatingInstances`, `GroupTotalCapacity`, `GroupTotalInstances`"
   type        = bool
   default     = false
 }
@@ -35,7 +26,7 @@ variable "vpc_id" {
 }
 
 #Load Balancer
-variable "enable_alb" {
+variable "alb_enable" {
   description = "enbale ALB or not"
   type        = bool
   default     = true
@@ -80,16 +71,10 @@ variable "service_health_check" {
 }
 
 #acm
-variable "acm_domain_name" {
+variable "app_domain_name" {
   description = "The complete domain name for which the ACM certificate to be issued"
   type        = string
   default     = ""
-}
-
-variable "route53_zone_id" {
-  description = "ID of DNS zone or Hosted Zone hosted in Route 53"
-  type        = string
-  default     = null
 }
 
 # ASG configuration
@@ -111,19 +96,25 @@ variable "asg_instance_type" {
   default     = "t3a.small"
 }
 
-variable "min_asg_capacity" {
+variable "health_check_type" {
+  description = "type of health check EC2 or ELB"
+  type        = string
+  default     = "EC2"
+}
+
+variable "min_capacity" {
   description = "The minimum size ( number of instances ) of the autoscaling group to maintain at all times"
   type        = number
   default     = 1
 }
 
-variable "max_asg_capacity" {
+variable "max_capacity" {
   description = "The maximum size ( number of instances ) of the autoscaling group that can be added to Autoscaling group"
   type        = number
   default     = 1
 }
 
-variable "desired_asg_capacity" {
+variable "desired_capacity" {
   description = "The number of Amazon EC2 instances that should be running in the autoscaling group under ideal conditions"
   type        = number
   default     = 1
@@ -174,19 +165,67 @@ variable "mem_based_scaling_policy" {
   }
 }
 
-variable "sqs_queue_depth_based_scaling_policy" {
-  description = "Scaling Policy based on SQS Queue Depth"
-  type        = map(string)
-  default = {
-    enabled                = true
-    target_sqs_queue_name  = "my_queue"
-    target_sqs_queue_depth = 80
-    #target_sqs_queue_depth_period_sec = 300
-  }
-}
-
 variable "region" {
   description = "region in which application should be deployed "
   type        = string
   default     = "us-west-2"
+}
+
+variable "route53_hosted_zone_domain" {
+  description = "hosted zone domain"
+  type        = string
+  default     = "skaf.squareops.in"
+}
+
+variable "ingress_rules_alb" {
+  type = map(object({
+    from_port   = number
+    to_port     = number
+    protocol    = string
+    cidr_blocks = list(string)
+  }))
+  default = {
+    http = {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "TCP"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+    https = {
+      from_port   = 443
+      to_port     = 443
+      protocol    = "TCP"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
+}
+
+variable "ingress_rules_asg" {
+  type = map(object({
+    from_port       = number
+    to_port         = number
+    protocol        = string
+    cidr_blocks     = optional(list(string))
+    security_groups = optional(list(string))
+  }))
+  default = {
+    ssh = {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "TCP"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+    http = {
+      from_port       = 80
+      to_port         = 80
+      protocol        = "TCP"
+      security_groups = [""]
+    }
+    https = {
+      from_port       = 443
+      to_port         = 443
+      protocol        = "TCP"
+      security_groups = [""]
+    }
+  }
 }

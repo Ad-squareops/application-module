@@ -1,4 +1,4 @@
-## sqs
+## AutoScalingGroup Module
 
 ![squareops_avatar]
 
@@ -7,7 +7,7 @@
 ### [SquareOps Technologies](https://squareops.com/) Your DevOps Partner for Accelerating cloud journey.
 <br>
 
-This module deploys ASG. With this module, take the advantage of ASG installation in your AWS account. This module will deploy ASG, ALB, ACM, scaling policies, pem-key to secrets manager and route 53 sub domain which will be used for your application and domain and acm mapping to ALB for https request.
+This module deploys AutoScalingGroup, Application Load Balancer majorly and small resources required to launch an application. With this module, take the advantage of AutoScalingGroup and Application Load Balancer installation in your AWS account. This module will deploy ASG, ALB, ACM, scaling policies, pem-key to secrets manager and route 53 sub domain which will be used for your application and domain and acm mapping to ALB for https support.
 
 ## Important Notes:
 This module is compatible with all the terraform versions which is great news for users deploying the module on AWS running account. Reviewed the module's documentation, meet specific configuration requirements, and test thoroughly after deployment to ensure everything works as expected.
