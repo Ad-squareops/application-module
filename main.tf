@@ -1,5 +1,6 @@
 #ALB Security Group
-resource "aws_security_group" "alb-sg" {
+resource "aws_security_group" "alb-security_group" {
+  count       = var.alb_enable ? 1 : 0
   name        = format("%s-%s-alb-sg", var.environment, var.app_name)
   description = "Application Load Balancer Security Group"
   vpc_id      = var.vpc_id
@@ -30,7 +31,7 @@ module "alb" {
   load_balancer_type = "application"
   vpc_id             = var.vpc_id
   subnets            = var.alb_public_subnets
-  security_groups    = [aws_security_group.alb-sg.id]
+  security_groups    = [aws_security_group.alb-security_group[0].id]
   enable_http2       = true
 
   access_logs = {
@@ -121,7 +122,7 @@ module "key_pair" {
   ssm_parameter_path = format("%s_%s_key", var.environment, var.app_name)
 }
 
-resource "aws_security_group" "asg-sg" {
+resource "aws_security_group" "asg-security_group" {
   name        = format("%s-%s-app_asg_sg", var.environment, var.app_name)
   description = "Security group for Application Instances"
   vpc_id      = var.vpc_id
@@ -169,7 +170,7 @@ module "asg" {
   name                      = format("%s-%s-asg", var.environment, var.app_name)
   min_size                  = var.min_capacity
   max_size                  = var.max_capacity
-  user_data                 = var.user_data
+  user_data                 = var.user_data_enable ? var.user_data : null
   enabled_metrics           = var.metrics_enabled ? ["GroupMinSize", "GroupMaxSize", "GroupDesiredCapacity", "GroupInServiceInstances", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"] : null
   desired_capacity          = var.desired_capacity
   vpc_zone_identifier       = var.app_private_subnets
@@ -198,7 +199,7 @@ module "asg" {
   key_name                    = module.key_pair.key_pair_name
   ebs_optimized               = true
   enable_monitoring           = true
-  security_groups             = [aws_security_group.asg-sg.id]
+  security_groups             = [aws_security_group.asg-security_group.id]
   iam_instance_profile_name   = aws_iam_instance_profile.instance-profile.name
 }
 
@@ -310,6 +311,24 @@ module "route53-record" {
     evaluate_target_health = true
   }
 }
+
+# module "route53-record" {
+#   source          = "terraform-aws-modules/route53/aws//modules/records"
+#   version         = "~> 2.0"
+#   zone_id         = data.aws_route53_zone.selected.zone_id
+#   records = [
+#     {
+#       name    = var.app_domain_name
+#       allow_overwrite = false
+#       type    = "A"
+#       alias   = {
+#         name    = module.alb[0].lb_dns_name
+#         zone_id = module.alb[0].lb_zone_id
+#         evaluate_target_health = true
+#       }
+#     },
+#   ]
+# }
 
 
 module "acm" {

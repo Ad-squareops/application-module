@@ -84,9 +84,15 @@ variable "asg_ami_id" {
   default     = ""
 }
 
+variable "user_data_enable" {
+  description = "want to pass user data or not"
+  type        = bool
+  default     = false
+}
+
 variable "user_data" {
-  description = "user data script which user have to pass or not"
-  type        = any
+  description = "user data script which user have to pass"
+  type        = string
   default     = null
 }
 

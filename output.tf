@@ -38,27 +38,27 @@ output "autoscaling_group_load_balancers" {
   value       = module.asg.autoscaling_group_load_balancers
 }
 
-output "lb_id" {
+output "load_balancer_id" {
   description = "The ID and ARN of the load balancer we created."
   value       = var.alb_enable ? module.alb[0].lb_id : null
 }
 
-output "lb_arn" {
+output "load_balancer_arn" {
   description = "The ID and ARN of the load balancer we created."
   value       = var.alb_enable ? module.alb[0].lb_arn : null
 }
 
-output "lb_dns_name" {
+output "load_balancer_dns_name" {
   description = "The DNS name of the load balancer."
   value       = var.alb_enable ? module.alb[0].lb_dns_name : null
 }
 
-output "lb_arn_suffix" {
+output "load_balancer_arn_suffix" {
   description = "ARN suffix of our load balancer - can be used with CloudWatch."
   value       = var.alb_enable ? module.alb[0].lb_arn_suffix : null
 }
 
-output "lb_zone_id" {
+output "load_balancer_zone_id" {
   description = "The zone_id of the load balancer to assist with creating DNS records."
   value       = var.alb_enable ? module.alb[0].lb_zone_id : null
 }
@@ -118,7 +118,7 @@ output "iam_instance_profile_name" {
   value       = aws_iam_instance_profile.instance-profile.name
 }
 
-output "alb_sg_id" {
+output "alb_security_group_id" {
   description = "ALB security group id"
-  value       = aws_security_group.alb-sg.id
+  value       = aws_security_group.alb-security_group[0].id
 }
