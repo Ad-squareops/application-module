@@ -1,119 +1,29 @@
-output "autoscaling_group_id" {
-  description = "The autoscaling group ID"
-  value       = module.asg.autoscaling_group_id
-}
-
-output "autoscaling_group_name" {
-  description = "The autoscaling group name"
-  value       = module.asg.autoscaling_group_name
-}
-
-output "autoscaling_group_min_size" {
-  description = "The minimum size of the autoscale group"
-  value       = module.asg.autoscaling_group_min_size
-}
-
-output "autoscaling_group_max_size" {
-  description = "The maximum size of the autoscale group"
-  value       = module.asg.autoscaling_group_max_size
-}
-
-output "autoscaling_group_desired_capacity" {
-  description = "The desired capacity of the autoscale group"
-  value       = module.asg.autoscaling_group_desired_capacity
-}
-
-output "autoscaling_group_health_check_type" {
-  description = "EC2 or ELB. Controls how health checking is done"
-  value       = module.asg.autoscaling_group_health_check_type
-}
-
-output "autoscaling_group_load_balancers" {
-  description = "The load balancer names associated with the autoscaling group"
-  value       = module.asg.autoscaling_group_load_balancers
-}
-
-output "load_balancer_id" {
-  description = "The ID and ARN of the load balancer we created."
-  value       = module.asg.load_balancer_id
-}
-
-output "load_balancer_arn" {
-  description = "The ID and ARN of the load balancer we created."
-  value       = module.asg.load_balancer_arn
-}
-
-output "load_balancer_dns_name" {
-  description = "The DNS name of the load balancer."
-  value       = module.asg.load_balancer_dns_name
-}
-
-output "load_balancer_arn_suffix" {
-  description = "ARN suffix of our load balancer - can be used with CloudWatch."
-  value       = module.asg.load_balancer_arn_suffix
-}
-
-output "load_balancer_zone_id" {
-  description = "The zone_id of the load balancer to assist with creating DNS records."
-  value       = module.asg.load_balancer_zone_id
-}
-
-output "http_tcp_listener_arns" {
-  description = "The ARN of the TCP and HTTP load balancer listeners created."
-  value       = module.asg.http_tcp_listener_arns
-}
-
-output "http_tcp_listener_ids" {
-  description = "The IDs of the TCP and HTTP load balancer listeners created."
-  value       = module.asg.http_tcp_listener_ids
-}
-
-output "https_listener_arns" {
-  description = "The ARNs of the HTTPS load balancer listeners created."
-  value       = module.asg.https_listener_arns
-}
-
-output "https_listener_ids" {
-  description = "The IDs of the load balancer listeners created."
-  value       = module.asg.https_listener_ids
-}
-
-output "target_group_arns" {
-  description = "ARNs of the target groups. Useful for passing to your Auto Scaling group."
-  value       = module.asg.target_group_arns
-}
-
-output "target_group_arn_suffixes" {
-  description = "ARN suffixes of our target groups - can be used with CloudWatch."
-  value       = module.asg.target_group_arn_suffixes
-}
-
-output "target_group_names" {
-  description = "Name of the target group. Useful for passing to your CodeDeploy Deployment Group."
-  value       = module.asg.target_group_names
-}
-
-output "target_group_attachments" {
-  description = "ARNs of the target group attachment IDs."
-  value       = module.asg.target_group_attachments
-}
-
-output "key_pair_name" {
-  description = "The key pair name."
-  value       = module.asg.key_pair_name
-}
-
-output "iam_instance_profile_arn" {
-  description = "The ARN of the instance Profile"
-  value       = module.asg.iam_instance_profile_arn
-}
-
-output "iam_instance_profile_name" {
-  description = "The name of the instance Profile"
-  value       = module.asg.iam_instance_profile_name
+output "name_of_application" {
+  description = "The name of Application"
+  value       = module.application.name_of_application
 }
 
 output "alb_security_group_id" {
   description = "ALB security group ID"
-  value       = module.asg.alb_security_group_id
+  value       = module.application.alb_security_group_id
+}
+
+output "autoscaling_group_details" {
+  description = "The autoscaling group details"
+  value       = module.application.autoscaling_group_details
+}
+
+output "application_load_balancer_details" {
+  description = "The application load balancer details"
+  value       = module.application.application_load_balancer
+}
+
+output "target_group_details" {
+  description = "The target group details"
+  value       = module.application.target_group_details
+}
+
+output "launch_template_details" {
+  description = "launch template config details"
+  value       = module.application.launch_template_details
 }

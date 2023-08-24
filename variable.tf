@@ -26,7 +26,7 @@ variable "vpc_id" {
 }
 
 #Load Balancer
-variable "alb_enable" {
+variable "alb_enabled" {
   description = "enbale ALB or not"
   type        = bool
   default     = true
@@ -78,7 +78,7 @@ variable "app_domain_name" {
 }
 
 # ASG configuration
-variable "asg_ami_id" {
+variable "ami_id" {
   description = "The AMI which is to be used to launch the application instance"
   type        = string
   default     = ""
@@ -138,6 +138,23 @@ variable "use_default_image" {
   default     = false
 }
 
+variable "ebs_device_name" {
+  description = "name of the ebs volume device name"
+  type        = string
+  default     = ""
+}
+
+variable "ebs_volume_size" {
+  description = "size of the ebs volume device"
+  type        = number
+  default     = 10
+}
+
+variable "ebs_volume_type" {
+  description = "type of the ebs volume device"
+  type        = string
+  default     = ""
+}
 
 # Scaling Configuration
 variable "cpu_based_scaling_policy" {
@@ -178,12 +195,13 @@ variable "region" {
 }
 
 variable "route53_hosted_zone_domain" {
-  description = "hosted zone domain"
+  description = "route 53 hosted zone domain in which our app sub domain will be published"
   type        = string
   default     = "skaf.squareops.in"
 }
 
 variable "ingress_rules_alb" {
+  description = "ingress rules for application load balancer seucrity group"
   type = map(object({
     from_port   = number
     to_port     = number
@@ -207,6 +225,7 @@ variable "ingress_rules_alb" {
 }
 
 variable "ingress_rules_asg" {
+  description = "ingress rules for autoscaling group seucrity group"
   type = map(object({
     from_port       = number
     to_port         = number

@@ -1,6 +1,6 @@
 #ALB Security Group
 resource "aws_security_group" "alb-security_group" {
-  count       = var.alb_enable ? 1 : 0
+  count       = var.alb_enabled ? 1 : 0
   name        = format("%s-%s-alb-sg", var.environment, var.app_name)
   description = "Application Load Balancer Security Group"
   vpc_id      = var.vpc_id
@@ -23,10 +23,10 @@ resource "aws_security_group" "alb-security_group" {
   }
 }
 
-module "alb" {
+module "application_load_balancer" {
   source             = "terraform-aws-modules/alb/aws"
   version            = "~> 6.0"
-  count              = var.alb_enable ? 1 : 0
+  count              = var.alb_enabled ? 1 : 0
   name               = format("%s-%s-alb", var.environment, var.app_name)
   load_balancer_type = "application"
   vpc_id             = var.vpc_id
@@ -175,7 +175,7 @@ module "asg" {
   desired_capacity          = var.desired_capacity
   vpc_zone_identifier       = var.app_private_subnets
   wait_for_capacity_timeout = 0
-  target_group_arns         = module.alb[0].target_group_arns
+  target_group_arns         = module.application_load_balancer[0].target_group_arns
   health_check_type         = "EC2"
   default_instance_warmup   = 300
 
@@ -194,13 +194,26 @@ module "asg" {
   launch_template_name        = "${var.app_name}-launch_template"
   launch_template_description = "Launch template for application"
   update_default_version      = true
-  image_id                    = var.use_default_image ? data.aws_ami.ubuntu_ami.image_id : var.asg_ami_id
+  image_id                    = var.use_default_image ? data.aws_ami.ubuntu_ami.image_id : var.ami_id
   instance_type               = var.asg_instance_type
   key_name                    = module.key_pair.key_pair_name
   ebs_optimized               = true
   enable_monitoring           = true
   security_groups             = [aws_security_group.asg-security_group.id]
   iam_instance_profile_name   = aws_iam_instance_profile.instance-profile.name
+
+  block_device_mappings = [
+    {
+      device_name = var.ebs_device_name
+      no_device   = 0
+      ebs = {
+        delete_on_termination = true
+        encrypted             = true
+        volume_size           = var.ebs_volume_size
+        volume_type           = var.ebs_volume_type
+      }
+    }
+  ]
 }
 
 
@@ -223,7 +236,7 @@ resource "aws_autoscaling_policy" "asg_cpu_policy" {
 
 # ALBRequestCountPerTarget
 resource "aws_autoscaling_policy" "asg_ALB_request_count_policy" {
-  depends_on                = [module.alb]
+  depends_on                = [module.application_load_balancer]
   count                     = var.alb_req_count_based_scaling_policy.enabled ? 1 : 0
   name                      = "${var.app_name}-ALBRequestCountPerTarget-policy"
   autoscaling_group_name    = module.asg.autoscaling_group_name
@@ -232,7 +245,7 @@ resource "aws_autoscaling_policy" "asg_ALB_request_count_policy" {
   target_tracking_configuration {
     predefined_metric_specification {
       predefined_metric_type = "ALBRequestCountPerTarget"
-      resource_label         = "${module.alb[0].lb_arn_suffix}/${module.alb[0].target_group_arn_suffixes[0]}"
+      resource_label         = "${module.application_load_balancer[0].lb_arn_suffix}/${module.application_load_balancer[0].target_group_arn_suffixes[0]}"
     }
     target_value = var.alb_req_count_based_scaling_policy.target_alb_req_count_per_sec
   }
@@ -306,30 +319,11 @@ module "route53-record" {
   name            = var.app_domain_name
   type            = "A"
   alias = {
-    name                   = module.alb[0].lb_dns_name
-    zone_id                = module.alb[0].lb_zone_id
+    name                   = module.application_load_balancer[0].lb_dns_name
+    zone_id                = module.application_load_balancer[0].lb_zone_id
     evaluate_target_health = true
   }
 }
-
-# module "route53-record" {
-#   source          = "terraform-aws-modules/route53/aws//modules/records"
-#   version         = "~> 2.0"
-#   zone_id         = data.aws_route53_zone.selected.zone_id
-#   records = [
-#     {
-#       name    = var.app_domain_name
-#       allow_overwrite = false
-#       type    = "A"
-#       alias   = {
-#         name    = module.alb[0].lb_dns_name
-#         zone_id = module.alb[0].lb_zone_id
-#         evaluate_target_health = true
-#       }
-#     },
-#   ]
-# }
-
 
 module "acm" {
   source              = "terraform-aws-modules/acm/aws"

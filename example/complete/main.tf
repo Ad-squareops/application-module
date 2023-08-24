@@ -1,9 +1,8 @@
 locals {
   region                     = "us-east-2"
-  vpc_cidr                   = "10.10.0.0/16"
   environment                = "prod"
   app_name                   = "demosops"
-  vpc_id                     = "vpc-0f705f9d61877e2d3"
+  vpc_id                     = "vpc-08f755b2542b7c16a"
   user_data_enable           = true
   user_data                  = <<-EOT
     #!/bin/bash
@@ -18,12 +17,12 @@ locals {
   }
 }
 
-module "asg" {
+module "application" {
   source = "../../"
 
   environment         = local.environment
   app_name            = local.app_name
-  app_private_subnets = ["subnet-0fd9d2f28e6c576d1"]
+  app_private_subnets = ["subnet-071c42172f8e7c580"]
   min_capacity        = 1
   max_capacity        = 1
   desired_capacity    = 1
@@ -32,14 +31,16 @@ module "asg" {
   user_data           = base64encode(local.user_data)
 
   # Launch template
-  asg_ami_id        = "ami-0430580de6244e02e"
+  ami_id            = "ami-0430580de6244e02e"
   asg_instance_type = "t3a.small"
   use_default_image = false ### if default image is true then don't pass the asg ami id
-
+  ebs_device_name   = "/dev/sda1"
+  ebs_volume_size   = 20
+  ebs_volume_type   = "gp2"
 
   #Load balancer
   vpc_id             = local.vpc_id
-  alb_public_subnets = ["subnet-0a5ba714a28c23ece", "subnet-0285129d7b331395b"]
+  alb_public_subnets = ["subnet-00b6bc5653565011b", "subnet-01706e0ebaac37151"]
   app_domain_name    = local.app_domain_name
 
   #the port to be exposed by application over loadbalancer listener
@@ -117,13 +118,13 @@ module "asg" {
       from_port       = 80
       to_port         = 80
       protocol        = "TCP"
-      security_groups = [module.asg.alb_security_group_id]
+      security_groups = [module.application.alb_security_group_id]
     }
     https = {
       from_port       = 443
       to_port         = 443
       protocol        = "TCP"
-      security_groups = [module.asg.alb_security_group_id]
+      security_groups = [module.application.alb_security_group_id]
     }
   }
 }
