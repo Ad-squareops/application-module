@@ -17,30 +17,34 @@ This module is compatible with all the terraform versions which is great news fo
 
 ```hcl
 
-module "asg" {
+module "application" {
   source = "../../"
 
-  Environment          = local.Environment
-  app_name             = local.app_name
-  app_private_subnets  = ["subnet-0a922c6f66dc35a69"]
-  min_asg_capacity     = 1
-  max_asg_capacity     = 1
-  desired_asg_capacity = 1
-  enabled_metrics      = false
+  vpc_id             = local.vpc_id
+  app_name            = local.app_name
+  environment         = local.environment
+  user_data           = base64encode(local.user_data)
+  min_capacity        = 1
+  max_capacity        = 1
+  desired_capacity    = 1
+  metrics_enabled     = false
+  health_check_type   = "EC2"
+  app_domain_name    = local.app_domain_name
+  app_private_subnets = ["subnet-071c42172f8e7c580"]
+  route53_hosted_zone_name = local.route53_hosted_zone_name
 
   # Launch template
-  asg_ami_id        = "ami-08e5424edfe926b43"
+  ami_id            = "ami-0430580de6244e02e"
   asg_instance_type = "t3a.small"
-  use_default_image = false
-
+  use_default_image = false ### if default image is true then don't pass the asg ami id
+  ebs_device_name   = "/dev/sda1"
+  ebs_volume_size   = 20
+  ebs_volume_type   = "gp2"
 
   #Load balancer
-  vpc_id             = local.vpc_id
-  alb_public_subnets = ["subnet-044e1ac384f464b00", "subnet-07f69540d40775872"]
-  route53_zone_id    = local.route53_zone_id
-  acm_domain_name    = local.acm_domain_name
+  alb_public_subnets = ["subnet-00b6bc5653565011b", "subnet-01706e0ebaac37151"]
 
-
+  #the port to be exposed by application over loadbalancer listener
   application_port = {
     backend_protocol = "HTTP"
     backend_port     = 80
@@ -53,6 +57,22 @@ module "asg" {
     target_type                    = "instance"
   }
 
+  cpu_based_scaling_policy = {
+    enabled                           = true
+    target_cpu_utilization_precentage = 80
+  }
+
+  alb_req_count_based_scaling_policy = {
+    enabled                      = true
+    target_alb_req_count_per_sec = 8000
+  }
+
+  mem_based_scaling_policy = {
+    enabled                                = false
+    target_mem_utilization_precentage_high = 80
+    target_mem_utilization_precentage_low  = 50
+  }
+
   service_health_check = {
     path         = "/"
     matcher      = 200
@@ -60,9 +80,55 @@ module "asg" {
     timeout_sec  = "5"
     interval_sec = "30"
   }
+
+  ingress_rules_alb = {
+    all = {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+    test = {
+      from_port   = 34
+      to_port     = 34
+      protocol    = "TCP"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+    http = {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "TCP"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+    https = {
+      from_port   = 443
+      to_port     = 443
+      protocol    = "TCP"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
+
+  ingress_rules_asg = {
+    ssh = {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "TCP"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+    http = {
+      from_port       = 80
+      to_port         = 80
+      protocol        = "TCP"
+      security_groups = [module.application.alb_security_group_id]
+    }
+    https = {
+      from_port       = 443
+      to_port         = 443
+      protocol        = "TCP"
+      security_groups = [module.application.alb_security_group_id]
+    }
+  }
 }
-
-
 
 
 ```

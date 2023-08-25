@@ -1,15 +1,15 @@
 locals {
-  region                     = "us-east-2"
-  environment                = "prod"
-  app_name                   = "demosops"
-  vpc_id                     = "vpc-08f755b2542b7c16a"
-  user_data_enable           = true
-  user_data                  = <<-EOT
+  region                   = "us-east-2"
+  environment              = "prod"
+  app_name                 = "demosops"
+  vpc_id                   = "vpc-08f755b2542b7c16a"
+  user_data_enable         = true
+  user_data                = <<-EOT
     #!/bin/bash
     echo "Hello Terraform!"
   EOT
-  route53_hosted_zone_domain = "skaf.squareops.in"
-  app_domain_name            = "demosops.prod.skaf.squareops.in" #skaf.sqauerops.in is the hosted zone. subdomain will be published in this for the application
+  route53_hosted_zone_name = "skaf.squareops.in"
+  app_domain_name          = "demosops.prod.skaf.squareops.in" #skaf.sqauerops.in is the hosted zone. subdomain will be published in this for the application
   additional_tags = {
     Owner      = "squareops"
     Expires    = "Never"
@@ -20,15 +20,18 @@ locals {
 module "application" {
   source = "../../"
 
-  environment         = local.environment
-  app_name            = local.app_name
-  app_private_subnets = ["subnet-071c42172f8e7c580"]
-  min_capacity        = 1
-  max_capacity        = 1
-  desired_capacity    = 1
-  metrics_enabled     = false
-  health_check_type   = "EC2"
-  user_data           = base64encode(local.user_data)
+  vpc_id                   = local.vpc_id
+  app_name                 = local.app_name
+  environment              = local.environment
+  user_data                = base64encode(local.user_data)
+  min_capacity             = 1
+  max_capacity             = 1
+  desired_capacity         = 1
+  metrics_enabled          = false
+  health_check_type        = "EC2"
+  app_domain_name          = local.app_domain_name
+  app_private_subnets      = ["subnet-071c42172f8e7c580"]
+  route53_hosted_zone_name = local.route53_hosted_zone_name
 
   # Launch template
   ami_id            = "ami-0430580de6244e02e"
@@ -39,21 +42,19 @@ module "application" {
   ebs_volume_type   = "gp2"
 
   #Load balancer
-  vpc_id             = local.vpc_id
   alb_public_subnets = ["subnet-00b6bc5653565011b", "subnet-01706e0ebaac37151"]
-  app_domain_name    = local.app_domain_name
 
   #the port to be exposed by application over loadbalancer listener
   application_port = {
-    backend_protocol = "HTTP"
     backend_port     = 80
+    backend_protocol = "HTTP"
   }
 
   alb_configuration = {
+    target_type                    = "instance"
     stickiness_enabled             = true
     stickiness_type                = "lb_cookie"
     stickiness_cookie_duration_sec = 600
-    target_type                    = "instance"
   }
 
   cpu_based_scaling_policy = {
@@ -68,8 +69,8 @@ module "application" {
 
   mem_based_scaling_policy = {
     enabled                                = false
-    target_mem_utilization_precentage_high = 80
     target_mem_utilization_precentage_low  = 50
+    target_mem_utilization_precentage_high = 80
   }
 
   service_health_check = {

@@ -194,7 +194,7 @@ variable "region" {
   default     = "us-west-2"
 }
 
-variable "route53_hosted_zone_domain" {
+variable "route53_hosted_zone_name" {
   description = "route 53 hosted zone domain in which our app sub domain will be published"
   type        = string
   default     = "skaf.squareops.in"

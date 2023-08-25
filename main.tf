@@ -334,5 +334,5 @@ module "acm" {
 }
 
 data "aws_route53_zone" "selected" {
-  name = var.route53_hosted_zone_domain
+  name = var.route53_hosted_zone_name
 }
