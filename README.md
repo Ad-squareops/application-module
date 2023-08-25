@@ -136,61 +136,93 @@ module "application" {
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
-No requirements.
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.36 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.36 |
+
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_acm"></a> [acm](#module\_acm) | terraform-aws-modules/acm/aws | ~> 4.0 |
+| <a name="module_application_load_balancer"></a> [application\_load\_balancer](#module\_application\_load\_balancer) | terraform-aws-modules/alb/aws | ~> 6.0 |
+| <a name="module_asg"></a> [asg](#module\_asg) | terraform-aws-modules/autoscaling/aws | 6.10.0 |
+| <a name="module_key_pair"></a> [key\_pair](#module\_key\_pair) | squareops/keypair/aws | 1.0.2 |
+| <a name="module_route53-record"></a> [route53-record](#module\_route53-record) | clouddrove/route53-record/aws | 1.0.1 |
+| <a name="module_s3_bucket_alb_access_logs"></a> [s3\_bucket\_alb\_access\_logs](#module\_s3\_bucket\_alb\_access\_logs) | terraform-aws-modules/s3-bucket/aws | ~> 3.7.0 |
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_autoscaling_policy.RAM_based_scale_down](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_policy) | resource |
+| [aws_autoscaling_policy.RAM_based_scale_up](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_policy) | resource |
+| [aws_autoscaling_policy.asg_ALB_request_count_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_policy) | resource |
+| [aws_autoscaling_policy.asg_cpu_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_policy) | resource |
+| [aws_cloudwatch_metric_alarm.RAM_based_scale_up_alarm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
+| [aws_cloudwatch_metric_alarm.scale_down_alarm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
+| [aws_iam_instance_profile.instance-profile](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile) | resource |
+| [aws_iam_role.instance-role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy.instance-profile](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy_attachment.cloudwatch-asg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.ssm-policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_security_group.alb-security_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.asg-security_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_ami.ubuntu_ami](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
+| [aws_route53_zone.selected](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
 
 ## Inputs
 
-| Name | Description | Type | Default |
-|------|-------------|------|---------|
-| <a name="create"></a> [create](#input\_create) | Whether to create SQS queue. | `bool` | `true` |
-| <a name="create_sns_topic"></a> [create\_sns\_topic](#input\_create\_sns\_topic) | enable sns topic or not. | `bool` | `true` |
-| <a name="content_based_deduplication"></a> [content\_based\_deduplication](#input\_content\_based\_deduplication) | Enables content-based deduplication for FIFO queues. | `bool` | `true` |
-| <a name="delay_seconds"></a> [delay\_seconds](#input\_delay\_seconds) | The time in seconds that the delivery of all messages in the queue will be delayed. An integer from 0 to 900 (15 minutes). | `number` | `5` |
-| <a name="fifo_queue"></a> [fifo\_queue](#input\_fifo\_queue) | Boolean designating a FIFO queue. | `bool` | `false` |
-| <a name="fifo_throughput_limit"></a> [fifo\_throughput\_limit](#input\_fifo\_throughput\_limit) | Specifies whether the FIFO queue throughput quota applies to the entire queue or per message groupWorks only on FIFO Level. | `string` | `null` |
-| <a name="deduplication_scope"></a> [deduplication\_scope](#input\_deduplication\_scope) | Specifies whether message deduplication occurs at the message group or queue level. Works only on FIFO Level. | `string` | `null` |
-| <a name="max_message_size"></a> [max\_message\_size](#input\_max\_message\_size) | The limit of how many bytes a message can contain before Amazon SQS rejects it. An integer from 1024 bytes (1 KiB) up to 262144 bytes (256 KiB). | `number` | `2048` |
-| <a name="message_retention_seconds"></a> [message\_retention\_seconds](#input\_message\_retention\_seconds) | The number of seconds Amazon SQS retains a message. Integer representing seconds, from 60 (1 minute) to 1209600 (14 days). | `number` | `1800` |
-| <a name="name"></a> [name](#input\_name) | This is the human-readable name of the queue. If omitted, Terraform will assign a random name. | `string` | `""` |
-| <a name="use_name_prefix"></a> [use\_name\_prefix](#input\_mail\_from\_email\_domain) | Determines whether `name` is used as a prefix. | `bool` | `false` |
-| <a name="receive_wait_time_seconds"></a> [receive\_wait\_time\_seconds](#input\_receive\_wait\_time\_seconds) | The time for which a ReceiveMessage call will wait for a message to arrive (long polling) before returning. An integer from 0 to 20 (seconds). | `number` | `10` |
-| <a name="sqs_managed_sse_enabled"></a> [sqs\_managed\_sse\_enabled](#input\_sqs\_managed\_sse\_enabled) | Boolean to enable server-side encryption (SSE) of message content with SQS-owned encryption keys. | `bool` | `false` |
-| <a name="visibility_timeout_seconds"></a> [visibility\_timeout\_seconds](#input\_visibility\_timeout\_seconds) | The visibility timeout for the queue. An integer from 0 to 43200 (12 hours). | `number` | `60` |
-| <a name="create_queue_policy"></a> [create\_queue\_policy](#input\_create\_queue\_policy) | Whether to create SQS queue policy. | `bool` | `true` |
-| <a name="create_dlq"></a> [create](#input\_create\_dlq) | Determines whether to create SQS dead letter queue. | `bool` | `true` |
-| <a name="dlq_content_based_deduplication"></a> [dlq\_content\_based\_deduplication](#input\_dlq\_content\_based\_deduplication) | Enables content-based deduplication for FIFO queues. | `bool` | `true` |
-| <a name="dlq_delay_seconds"></a> [dlq\_delay\_seconds](#input\_dlq\_delay\_seconds) | The time in seconds that the delivery of all messages in the queue will be delayed. An integer from 0 to 900 (15 minutes). | `number` | `5` |
-| <a name="dlq_deduplication_scope"></a> [dlq\_deduplication\_scope](#input\_dlq\_deduplication\_scope) | Specifies whether message deduplication occurs at the message group or queue level. Works only on FIFO Level. | `string` | `null` |
-| <a name="dlq_message_retention_seconds"></a> [dlq\_message\_retention\_seconds](#input\_dlq\_message\_retention\_seconds) | The number of seconds Amazon SQS retains a message. Integer representing seconds, from 60 (1 minute) to 1209600 (14 days). | `number` | `1800` |
-| <a name="dlq_name"></a> [dlq\_name](#input\_dlq\_name) | This is the human-readable name of the queue. If omitted, Terraform will assign a random name. | `string` | `""` |
-| <a name="dlq_receive_wait_time_seconds"></a> [dlq\_receive\_wait\_time\_seconds](#input\_dlq\_receive\_wait\_time\_seconds) | The time for which a ReceiveMessage call will wait for a message to arrive (long polling) before returning. An integer from 0 to 20 (seconds). | `number` | `10` |
-| <a name="dlq_sqs_managed_sse_enabled"></a> [dlq\_sqs\_managed\_sse\_enabled](#input\_dlq\_sqs\_managed\_sse\_enabled) | Boolean to enable server-side encryption (SSE) of message content with SQS-owned encryption keys. | `bool` | `false` |
-| <a name="dlq_visibility_timeout_seconds"></a> [dlq\_visibility\_timeout\_seconds](#input\_dlq\_visibility\_timeout\_seconds) | The visibility timeout for the queue. An integer from 0 to 43200 (12 hours). | `number` | `60` |
-| <a name="create_dlq_queue_policy"></a> [create\_dlq\_queue\_policy](#input\_create\_dlq\_queue\_policy) | Whether to create SQS queue policy. | `bool` | `true` |
-| <a name="dlq_redrive_allow_policy"></a> [dlq\_redrive\_allow\_policy](#input\_dlq\_redrive\_allow\_policy) | The JSON policy to set up the Dead Letter Queue redrive permission, see AWS docs. | `any` | `{}` |
-| <a name="redrive_policy"></a> [redrive\_policy](#input\_redrive\_policy) | The JSON policy to set up the Dead Letter Queue, see AWS docs. Note: when specifying maxReceiveCount, you must specify it as an integer (5), and not a string (\"5\"). | `any` | `{}` |
-
-
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_alb_configuration"></a> [alb\_configuration](#input\_alb\_configuration) | Configuration for the application load balancer to be associated with instance group. | `map(string)` | <pre>{<br>  "stickiness_cookie_duration_sec": 600,<br>  "stickiness_enabled": true,<br>  "stickiness_type": "lb_cookie",<br>  "target_type": "instance"<br>}</pre> | no |
+| <a name="input_alb_enabled"></a> [alb\_enabled](#input\_alb\_enabled) | enbale ALB or not | `bool` | `true` | no |
+| <a name="input_alb_public_subnets"></a> [alb\_public\_subnets](#input\_alb\_public\_subnets) | public subnets to provision the loadbalancer. Make sure the availability zones are same as provided to application subnets | `list(string)` | `null` | no |
+| <a name="input_alb_req_count_based_scaling_policy"></a> [alb\_req\_count\_based\_scaling\_policy](#input\_alb\_req\_count\_based\_scaling\_policy) | Scaling Policy based on ALB Request Number of Count Per Target | `map(string)` | <pre>{<br>  "enabled": true,<br>  "target_alb_req_count_per_sec": 8000<br>}</pre> | no |
+| <a name="input_ami_id"></a> [ami\_id](#input\_ami\_id) | The AMI which is to be used to launch the application instance | `string` | `""` | no |
+| <a name="input_app_domain_name"></a> [app\_domain\_name](#input\_app\_domain\_name) | The complete domain name for which the ACM certificate to be issued | `string` | `""` | no |
+| <a name="input_app_name"></a> [app\_name](#input\_app\_name) | Name of the Application which we have to deploy | `string` | `""` | no |
+| <a name="input_app_private_subnets"></a> [app\_private\_subnets](#input\_app\_private\_subnets) | private subnets to launch the application into. Subnets automatically determine which availability zones the group will reside. | `list(string)` | `null` | no |
+| <a name="input_application_port"></a> [application\_port](#input\_application\_port) | the port to be exposed by application over loadbalancer listener. This port will be mapped to Security group of ASG | `map(string)` | <pre>{<br>  "backend_port": 80,<br>  "backend_protocol": "HTTP"<br>}</pre> | no |
+| <a name="input_asg_instance_type"></a> [asg\_instance\_type](#input\_asg\_instance\_type) | The type of the application instance which is used to deploy the application | `string` | `"t3a.small"` | no |
+| <a name="input_cpu_based_scaling_policy"></a> [cpu\_based\_scaling\_policy](#input\_cpu\_based\_scaling\_policy) | Scaling Policy based on CPU Utilization | `map(string)` | <pre>{<br>  "enabled": true,<br>  "target_cpu_utilization_precentage": 80<br>}</pre> | no |
+| <a name="input_desired_capacity"></a> [desired\_capacity](#input\_desired\_capacity) | The number of Amazon EC2 instances that should be running in the autoscaling group under ideal conditions | `number` | `1` | no |
+| <a name="input_ebs_device_name"></a> [ebs\_device\_name](#input\_ebs\_device\_name) | name of the ebs volume device name | `string` | `""` | no |
+| <a name="input_ebs_volume_size"></a> [ebs\_volume\_size](#input\_ebs\_volume\_size) | size of the ebs volume device | `number` | `10` | no |
+| <a name="input_ebs_volume_type"></a> [ebs\_volume\_type](#input\_ebs\_volume\_type) | type of the ebs volume device | `string` | `""` | no |
+| <a name="input_environment"></a> [environment](#input\_environment) | Environment name of the project like production, staging or developement | `string` | `""` | no |
+| <a name="input_health_check_type"></a> [health\_check\_type](#input\_health\_check\_type) | type of health check EC2 or ELB | `string` | `"EC2"` | no |
+| <a name="input_ingress_rules_alb"></a> [ingress\_rules\_alb](#input\_ingress\_rules\_alb) | ingress rules for application load balancer seucrity group | <pre>map(object({<br>    from_port   = number<br>    to_port     = number<br>    protocol    = string<br>    cidr_blocks = list(string)<br>  }))</pre> | <pre>{<br>  "http": {<br>    "cidr_blocks": [<br>      "0.0.0.0/0"<br>    ],<br>    "from_port": 80,<br>    "protocol": "TCP",<br>    "to_port": 80<br>  },<br>  "https": {<br>    "cidr_blocks": [<br>      "0.0.0.0/0"<br>    ],<br>    "from_port": 443,<br>    "protocol": "TCP",<br>    "to_port": 443<br>  }<br>}</pre> | no |
+| <a name="input_ingress_rules_asg"></a> [ingress\_rules\_asg](#input\_ingress\_rules\_asg) | ingress rules for autoscaling group seucrity group | <pre>map(object({<br>    from_port       = number<br>    to_port         = number<br>    protocol        = string<br>    cidr_blocks     = optional(list(string))<br>    security_groups = optional(list(string))<br>  }))</pre> | <pre>{<br>  "http": {<br>    "from_port": 80,<br>    "protocol": "TCP",<br>    "security_groups": [<br>      ""<br>    ],<br>    "to_port": 80<br>  },<br>  "https": {<br>    "from_port": 443,<br>    "protocol": "TCP",<br>    "security_groups": [<br>      ""<br>    ],<br>    "to_port": 443<br>  },<br>  "ssh": {<br>    "cidr_blocks": [<br>      "0.0.0.0/0"<br>    ],<br>    "from_port": 22,<br>    "protocol": "TCP",<br>    "to_port": 22<br>  }<br>}</pre> | no |
+| <a name="input_max_capacity"></a> [max\_capacity](#input\_max\_capacity) | The maximum size ( number of instances ) of the autoscaling group that can be added to Autoscaling group | `number` | `1` | no |
+| <a name="input_mem_based_scaling_policy"></a> [mem\_based\_scaling\_policy](#input\_mem\_based\_scaling\_policy) | Scaling Policy based on RAM/memory Utilization | `map(string)` | <pre>{<br>  "enabled": true,<br>  "target_mem_utilization_precentage_high": 80,<br>  "target_mem_utilization_precentage_low": 50<br>}</pre> | no |
+| <a name="input_metrics_enabled"></a> [metrics\_enabled](#input\_metrics\_enabled) | A list of metrics to collect. The allowed values are `GroupDesiredCapacity`, `GroupInServiceCapacity`, `GroupPendingCapacity`, `GroupMinSize`, `GroupMaxSize`, `GroupInServiceInstances`, `GroupPendingInstances`, `GroupStandbyInstances`, `GroupStandbyCapacity`, `GroupTerminatingCapacity`, `GroupTerminatingInstances`, `GroupTotalCapacity`, `GroupTotalInstances` | `bool` | `false` | no |
+| <a name="input_min_capacity"></a> [min\_capacity](#input\_min\_capacity) | The minimum size ( number of instances ) of the autoscaling group to maintain at all times | `number` | `1` | no |
+| <a name="input_region"></a> [region](#input\_region) | region in which application should be deployed | `string` | `"us-west-2"` | no |
+| <a name="input_route53_hosted_zone_name"></a> [route53\_hosted\_zone\_name](#input\_route53\_hosted\_zone\_name) | route 53 hosted zone domain in which our app sub domain will be published | `string` | `"skaf.squareops.in"` | no |
+| <a name="input_service_health_check"></a> [service\_health\_check](#input\_service\_health\_check) | Configuration for the application load balancer to perform the health checks on the instances. Matcher will be the success codes on which application response ito the health check path | `map(string)` | <pre>{<br>  "interval_sec": "30",<br>  "matcher": 200,<br>  "path": "/",<br>  "protocol": "HTTP",<br>  "timeout_sec": "15"<br>}</pre> | no |
+| <a name="input_use_default_image"></a> [use\_default\_image](#input\_use\_default\_image) | default ubuntu image with version 22.x | `bool` | `false` | no |
+| <a name="input_user_data"></a> [user\_data](#input\_user\_data) | user data script which user have to pass | `string` | `null` | no |
+| <a name="input_user_data_enable"></a> [user\_data\_enable](#input\_user\_data\_enable) | want to pass user data or not | `bool` | `false` | no |
+| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC id where the load balancer, ASG, application instances and other resources will be deployed | `string` | `""` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="queue_id"></a> [queu\_id](#output\_queue\_id) | The URL for the created Amazon SQS queue |
-| <a name="queue_arn"></a> [queue\_arn](#output\_queue\_arn) | The ARN of the SQS queue |
-| <a name="queue_url"></a> [queue\_url](#output\_queue\_url) | Same as `queue_id`: The URL for the created Amazon SQS queue |
-| <a name="queue_name"></a> [queue\_name](#output\_queue\_name) | The name of the SQS queue |
-| <a name="dead_letter_queue_id"></a> [dead\_letter\_queue\_id](#output\_dead\_letter\_queue\_id) | The URL for the created Amazon DLQ-SQS queue |
-| <a name="dead_letter_queue_arn"></a> [dead\_letter\_queue\_arn](#output\_dead\_letter\_queue\_arn) | The ARN of the DLQ-SQS queue |
-| <a name="dead_letter_queue_url"></a> [dead\_letter\_queue_url](#output\_dead\_letter\_queue_url) | Same as `dead_letter_queue_id`: The URL for the created Amazon DLQ-SQS queue |
-| <a name="dead_letter_queue_name"></a> [dead\_letter\_queue_name](#output\_dead\_letter\_queue_name) | The name of the DLQ-SQS queue |
-
+| <a name="output_alb_security_group_id"></a> [alb\_security\_group\_id](#output\_alb\_security\_group\_id) | ALB security group id |
+| <a name="output_application_load_balancer"></a> [application\_load\_balancer](#output\_application\_load\_balancer) | The application load balancer details |
+| <a name="output_autoscaling_group_details"></a> [autoscaling\_group\_details](#output\_autoscaling\_group\_details) | The autoscaling group details |
+| <a name="output_launch_template_details"></a> [launch\_template\_details](#output\_launch\_template\_details) | launch template config details |
+| <a name="output_name_of_application"></a> [name\_of\_application](#output\_name\_of\_application) | The name of Application |
+| <a name="output_target_group_details"></a> [target\_group\_details](#output\_target\_group\_details) | The target group details |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Contribution & Issue Reporting
